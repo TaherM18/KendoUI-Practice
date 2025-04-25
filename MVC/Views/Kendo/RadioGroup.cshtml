@@ -1,6 +1,5 @@
 @{
     ViewData["Title"] = "RadioGroup";
-    var stateList = ViewBag.StateList as List<Repository.Models.StateModel>;
 }
 
 <section class="row">
@@ -29,7 +28,7 @@
 <section class="row">
     <h3>Dynamic Radio Group</h3>
 
-    <h5>Select City</h5>
+    <h5>Select State</h5>
     <div id="radioGroupAPI"></div>
 
 </section>
@@ -38,6 +37,7 @@
 @section Scripts {
     <script type="module">
         import { config } from "/js/modules/config.js";
+        import { fetchStates } from "/js/modules/fetch.js";
 
         function initRadioButtons() {
             $("input[name='gender']").kendoRadioButton();
@@ -59,21 +59,18 @@
             });
         }
 
-        function 
+        async function initDynamicRadioGroup() {
 
-        function initDynamicRadioGroup() {
+            let states = await fetchStates();
+            let data = states.map((item) => ({ label: item.name, value: item.id }));
+            console.log("states:",states);
+            console.log("data:",data);
 
-            $("#radioGroup").kendoRadioGroup({
-                items: [
-                    { label: "Indian", value: "Indian" },
-                    { label: "American", value: "American" },
-                    { label: "Brazilian", value: "Brazilian" },
-                    { label: "Chinese", value: "Chinese" },
-                ],
-                value: "Indian",
+            $("#radioGroupAPI").kendoRadioGroup({
+                items: data,
                 layout: "vertical",
                 change: function(e) {
-                    console.log(`Selected Value: ${e.sender.value()}`);
+                    console.log(`Selected State: ${e.sender.value()}`);
                 }
             });
         }

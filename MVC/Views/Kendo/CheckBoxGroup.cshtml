@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "CheckBoxGroup";
+}
+
+<style>
+    /* Style the label for each checkbox */
+    .k-checkbox-label {
+        font-size: 16px;
+        color: #555;
+        margin-right: 15px; /* Adjust the spacing between checkboxes */
+    }
+
+    /* Change the checkbox appearance */
+    .k-checkbox {
+        border-color: #5cb85c; /* Green border color */
+        background-color: #dff0d8; /* Light green background */
+    }
+
+    /* Change the hover color of the checkbox */
+    .k-checkbox:hover {
+        background-color: #c3e6cb; /* Darker green on hover */
+    }
+
+    /* Customize checked state */
+    .k-checkbox input:checked + .k-checkbox-label {
+        color: #28a745; /* Green text color when checked */
+    }
+</style>
+
+<section class="row">
+
+    <section class="col-6">
+        <h3>Hardcoded</h3>
+        <h5>Select your preferred colors</h5>
+        <label for="violet">Violet</label>
+        <input type="checkbox" name="chkColor" value="violet" id="violet">
+        <label for="indigo">Indigo</label>
+        <input type="checkbox" name="chkColor" value="indigo" id="indigo">
+        <label for="blue">Blue</label>
+        <input type="checkbox" name="chkColor" value="blue" id="blue">
+        <label for="green">Green</label>
+        <input type="checkbox" name="chkColor" value="green" id="green">
+        <label for="yellow">Yellow</label>
+        <input type="checkbox" name="chkColor" value="yellow" id="yellow">
+        <label for="orange">Orange</label>
+        <input type="checkbox" name="chkColor" value="orange" id="orange">
+        <label for="red">Red</label>
+        <input type="checkbox" name="chkColor" value="red" id="red">
+    </section>
+
+    <section class="col-6">
+        <h3>Dynamic</h3>
+        <h5>Select your preferred cities</h5>
+        <div id="checkBoxGroup"></div>
+    </section>
+
+</section>
+
+@section Scripts {
+    <script type="module">
+
+        import { fetchCities } from "/js/modules/fetch.js";
+
+        function initHardcodedCheckBoxGroup() {
+            $("input[name='chkColor']").kendoCheckBox();
+        }
+
+        async function initDynamicCheckBoxGroup() {
+            let cities = await fetchCities();
+            let data = cities.map((item) => ({ label: item.name, value: item.id }));
+            $("#checkBoxGroup").kendoCheckBoxGroup({
+                items: data,
+                value: ["1"],
+                layout: "horizontal",
+                enabled: false,
+                change: function(e) {
+                    if (e.sender.value().length > 3) {
+                        // Limit the selection to 3
+                        alert("You can select a maximum of 3 cities.");
+                    }
+                }
+            });
+        }
+
+        function toggleCheckBoxGroup(isEnabled) {
+            var checkboxes = $("#checkBoxGroup").data("kendoCheckBoxGroup").wrapper.find("input");
+            checkboxes.each(function() {
+                var checkbox = $(this).data("kendoCheckBox");
+                checkbox.enable(isEnabled);
+            });
+        }
+
+        $(document).ready(function() {
+            initHardcodedCheckBoxGroup();
+            initDynamicCheckBoxGroup();
+
+            setTimeout(() => {
+                const selectedValues = $("#checkBoxGroup").data("kendoCheckBoxGroup").value();
+                console.log("selected cities:", selectedValues);
+                @* toggleCheckBoxGroup(true); *@
+                $("#checkBoxGroup").data("kendoCheckBoxGroup").enable(true);
+            }, 1500);
+
+        });
+    </script>
+}
