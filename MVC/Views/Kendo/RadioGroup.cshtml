@@ -26,10 +26,18 @@
 
 </section>
 
+<section class="row">
+    <h3>Dynamic Radio Group</h3>
+
+    <h5>Select City</h5>
+    <div id="radioGroupAPI"></div>
+
+</section>
+
 
 @section Scripts {
     <script type="module">
-        import { config } from "/js/config.js";
+        import { config } from "/js/modules/config.js";
 
         function initRadioButtons() {
             $("input[name='gender']").kendoRadioButton();
@@ -51,9 +59,29 @@
             });
         }
 
+        function 
+
+        function initDynamicRadioGroup() {
+
+            $("#radioGroup").kendoRadioGroup({
+                items: [
+                    { label: "Indian", value: "Indian" },
+                    { label: "American", value: "American" },
+                    { label: "Brazilian", value: "Brazilian" },
+                    { label: "Chinese", value: "Chinese" },
+                ],
+                value: "Indian",
+                layout: "vertical",
+                change: function(e) {
+                    console.log(`Selected Value: ${e.sender.value()}`);
+                }
+            });
+        }
+
         $(document).ready(function() {
             initRadioButtons();
             initRadioGroup();
+            initDynamicRadioGroup();
         });
     </script>
 }

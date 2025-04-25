@@ -28,31 +28,13 @@
 
 @section Scripts {
     <script type="module">
-        import { config } from "/js/config.js";
+        import { config } from "/js/modules/config.js";
+        import { 
+            fetchStates, 
+            fetchCitiesByState
+        } from "/js/modules/fetch.js";
 
         let states;
-
-        async function fetchStates() {
-            let requestOptions = {
-                method: "GET",
-                redirect: "follow"
-            };
-
-            const response = await fetch(`${config.origin}/api/state`, requestOptions)
-            const responseJson = await response.json();
-            return responseJson.data;
-        }
-
-        async function fetchCitiesByState(stateCode) {
-            let requestOptions = {
-                method: "GET",
-                redirect: "follow"
-            };
-
-            const response = await fetch(`${config.origin}/api/city/state/${stateCode}`, requestOptions)
-            const responseJson = await response.json();
-            return responseJson.data;
-        }
 
         function resetDropdown(dropdown, options) {
             dropdown.setOptions(options);
