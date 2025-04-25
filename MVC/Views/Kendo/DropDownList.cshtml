@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "DropdownList";
+    var stateList = ViewBag.StateList as List<Repository.Models.StateModel>;
+}
+
+<section class="col-4 m-auto mb-5">
+    <h3>Simple DropDown</h3>
+
+    <label for="stateDropdownHD">Hardcoded Data</label>
+    <select class="mb-2" id="stateDropdownHD"></select>
+
+    <label for="stateDropdownMB">Model Binding</label>
+    <select id="stateDropdownMB"></select>
+</section>
+
+<section class="col-4 m-auto mb-5">
+    <h3>Dependent DropDown</h3>
+
+    <select class="mb-2" id="stateDropdownDD"></select>
+    <select id="cityDropdownDD"></select>
+</section>
+
+<section class="col-4 m-auto mb-5">
+    <h3>DropDown with Server-Side Filtering</h3>
+
+    <select id="cityDropdownSF"></select>
+</section>
+
+@section Scripts {
+    <script type="module">
+        import { config } from "/js/config.js";
+
+        let states;
+
+        async function fetchStates() {
+            let requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
+
+            const response = await fetch(`${config.origin}/api/state`, requestOptions)
+            const responseJson = await response.json();
+            return responseJson.data;
+        }
+
+        async function fetchCitiesByState(stateCode) {
+            let requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
+
+            const response = await fetch(`${config.origin}/api/city/state/${stateCode}`, requestOptions)
+            const responseJson = await response.json();
+            return responseJson.data;
+        }
+
+        function resetDropdown(dropdown, options) {
+            dropdown.setOptions(options);
+            dropdown.value("");
+        }
+
+        $(document).ready(async function() {
+            @* Hardcoded Data *@
+            $("#stateDropdownHD").kendoDropDownList({
+                optionLabel: "Select a state...",
+                dataTextField: "name",
+                dataValueField: "code",
+                dataSource: [
+                    { name: "Gujarat", code: "GJ" },
+                    { name: "Maharashtra", code: "MH" },
+                    { name: "Rajasthan", code: "RJ" },
+                    { name: "Punjab", code: "PB" },
+                    { name: "TamilNadu", code: "TN" },
+                ]
+            });
+
+            @* Model Binding *@
+            states = @Html.Raw(Json.Serialize(stateList))
+            $("#stateDropdownMB").kendoDropDownList({
+                optionLabel: "Select a state...",
+                dataTextField: "name",
+                dataValueField: "code",
+                dataSource: states,
+            });
+
+            @* State-City Dependent Dropdown using API *@
+            $("#cityDropdownDD").kendoDropDownList({
+                optionLabel: "Select State First...",
+                dataTextField: "name",
+                dataValueField: "stateCode",
+                enable: false,
+                filter: "contains",
+                suggest: true,
+                @* CascadeFrom *@
+                @* cascadeFrom: "stateDropdownDD",
+                cascadeFromField: "stateCode", *@
+                change: function() {
+                    let cityName = this.text();
+                    let stateCode = this.value();
+                    console.log(`Selected City: ${cityName} - ${stateCode}`);
+                }
+            });
+
+            states = await fetchStates();
+            console.log("states:\n",states)
+            $("#stateDropdownDD").kendoDropDownList({
+                optionLabel: "Select a State...",
+                dataTextField: "name",
+                dataValueField: "code",
+                dataSource: states,
+                filter: "contains",
+                suggest: true,
+                change: async function() {
+                    let code = this.value();
+                    const cityDropdown = $("#cityDropdownDD").data("kendoDropDownList");
+
+                    @* Transport *@
+                    @* cityDropdown.transport.options.read.url = `${config.origin}/api/city/state/${code}`;
+                    cityDropdown.read(); *@
+
+                    if (!code) {
+                        resetDropdown(cityDropdown, { optionLabel: "Select State First..." });
+                        cityDropdown.enable(false);
+                        return;
+                    }
+
+                    resetDropdown(cityDropdown, { optionLabel: "Loading..." });
+                    cityDropdown.dataSource.data([]); // reset data
+
+                    let cities = await fetchCitiesByState(code);
+                    console.log("cities:", cities);
+                    resetDropdown(cityDropdown, { optionLabel: "Select a City..." });
+                    cityDropdown.setDataSource(cities);
+                    cityDropdown.enable(true);
+                }
+            });
+
+            @* Server-Side Filtering *@
+            $("#cityDropdownSF").kendoDropDownList({
+                optionLabel: "Select or Search City...",
+                dataTextField: "name",
+                dataValueField: "stateCode",
+                filter: "contains",
+                minLength: 1,
+                autoBind: false,
+                dataSource: {
+                    serverFiltering: true,
+                    transport: {
+                        read: {
+                            url: `${config.origin}/api/city/search`,
+                            dataType: "json"
+                        },
+                        error: function(e) {
+                            console.error("Error loading cities:", e);
+                            alert("Something went wrong while fetching cities.");
+                        },
+                        parameterMap: function(data, type) {
+                            const query = data.filter?.filters?.[0]?.value?.trim();
+                            return query ? { query } : {};
+                        }
+                    },
+                    schema: {
+                        data: "data"
+                    }
+                }
+            });
+
+        });
+    </script>
+}

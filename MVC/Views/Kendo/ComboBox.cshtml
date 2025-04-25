@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "ComboBox";
+}
+
+<section class="col-4 m-auto mb-5">
+    <h3>ComboBox Hardcoded</h3>
+    <input type="text" id="cityComboBox" />
+</section>
+
+<section class="col-4 m-auto mb-5">
+    <h3>ComboBox Dynamic</h3>
+    <input type="text" id="cityComboBoxAPI" />
+</section>
+
+@section Scripts {
+    <script type="module">
+        import { config } from "/js/config.js";
+
+        @* Hardcoded *@
+        $("#cityComboBox").kendoComboBox({
+            placeholder: "Select or type a city...",
+            dataTextField: "name",
+            dataValueField: "id",
+            dataSource: [
+                { id: 1, name: "Ahmedabad" },
+                { id: 2, name: "Surat" },
+                { id: 3, name: "Mumbai" },
+                { id: 4, name: "Pune" }
+            ],
+            filter: "contains",
+            suggest: true,
+            highlightFirst: true,
+            allowCustom: true
+        });
+
+        @* Dynamic via API *@
+        $("#cityComboBoxAPI").kendoComboBox({
+            placeholder: "Select or type a city...",
+            dataTextField: "name",
+            dataValueField: "id",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: `${config.origin}/api/city`,
+                        type: "GET",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: "data"
+                }
+            },
+            filter: "contains",
+            suggest: true,
+            highlightFirst: true,
+            allowCustom: true
+        });
+    </script>
+}
