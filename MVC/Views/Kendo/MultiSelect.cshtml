@@ -1,0 +1,88 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "MultiSelect";
+}
+
+<section class="row">
+
+    <section class="col-4">
+        <h5>Static</h5>
+        <select id="fruitsMultiSelect" multiple>
+            <option value="apple">Apple</option>
+            <option value="banana">Banana</option>
+            <option value="chickoo">Chickoo</option>
+            <option value="emblica">Emblica</option>
+            <option value="fig">Fig</option>
+            <option value="guava">Guava</option>
+            <option value="hackberry">Hackberry</option>
+            <option value="ilama">Ilama</option>
+            <option value="jackfruit">Jackfruit</option>
+            <option value="kiwi">Kiwi</option>
+            <option value="lychee">Lychee</option>
+            <option value="mulberry">Mulberry</option>
+            <option value="nonifruit">Noni Fruit</option>
+            <option value="oysterberry">Oysterberry</option>
+            <option value="persimmon">Persimmon</option>
+        </select>
+    </section>
+
+
+    <section class="col-4">
+        <h5>Dynamic using Fetch</h5>
+        <div id="multiSelect"></div>
+    </section>
+
+    <section class="col-4">
+        <h5>Dynamic using Transport</h5>
+        <div id="multiSelectTransport"></div>
+    </section>
+</section>
+
+@section Scripts {
+    <script type="module">
+        import { config } from "/js/modules/config.js";
+        import { fetchCities } from "/js/modules/fetch.js";
+
+        function initStaticMultiSelect() {
+            $("#fruitsMultiSelect").kendoMultiSelect({
+                placeholder: "Select Fruits..."
+            });
+        }
+
+        async function initDynamicMultiSelect() {
+            let cities = await fetchCities();
+            $("#multiSelect").kendoMultiSelect({
+                placeholder: "Select Cities...",
+                dataTextField: "name",
+                dataValueField: "id",
+                dataSource: cities
+            });
+        }
+
+        function initTransportMultiSelect() {
+            $("#multiSelectTransport").kendoMultiSelect({
+                placeholder: "Select Cities...",
+                dataTextField: "name",
+                dataValueField: "id",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: `${config.origin}/api/city`,
+                            type: "GET",
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        data: "data"
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            initStaticMultiSelect();
+            initDynamicMultiSelect();
+            initTransportMultiSelect();
+        });
+    </script>
+}
