@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "DateTimePicker";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .k-datetimepicker input[readonly] {
+            cursor: not-allowed;        /* Change cursor to indicate it's readonly */
+        }
+</style>
+
+<section class="col-4 m-auto">
+    <input id="dateTimePicker" />
+</section>
+
+@section Scripts {
+    <script>
+        function initDateTimePicker() {
+            $("#dateTimePicker").kendoDateTimePicker({
+                format: "dd-MM-yyyy HH:mm",  // Set desired format
+                value: new Date(),  // Set the initial value to current date and time
+                min: new Date(2025, 0, 1),  // Min date limit
+                max: new Date(2025, 11, 31),  // Max date limit
+                change: function(e) {
+                    var selectedDate = e.sender.value();
+                    console.log("Selected DateTime: ", kendo.toString(selectedDate, "dd-MM-yyyy HH:mm"));
+                }
+            });
+            const dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
+            $(dateTimePicker.element).prop("readonly", true);
+        }
+
+        $(document).ready(function() {
+            initDateTimePicker();
+        });
+    </script>
+}
