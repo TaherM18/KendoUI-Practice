@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "DatePicker";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .holiday-day {
+            background-color: #ffd700; /* Golden color */
+            color: black;
+            border-radius: 50%;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+        }
+
+        .k-datepicker input[readonly] {
+            background-color: #f2f2f2;  /* Light grey background */
+            cursor: not-allowed;        /* Change cursor to indicate it's readonly */
+        }
+    </style>
+}
+
+
+<section class="col-4 m-auto">
+    <input id="datePicker" />
+</section>
+
+@section Scripts {
+    <script type="module">
+        import { isValidDate } from "/js/modules/validation.js";
+        window.holidays = [
+            { date: "2025-01-01", title: "New Year's Day" },
+            { date: "2025-05-01", title: "Labour Day" },
+            { date: "2025-10-02", title: "Gandhi Jayanti" },
+            { date: "2025-12-25", title: "Christmas Day" }
+        ];
+
+        @* var holidays = ["2025-01-01", "2025-05-01", "2025-10-02", "2025-12-25"]; *@
+
+        function initDatePicker() {
+            $("#datePicker").kendoDatePicker({
+                format: "dd-MM-yyyy",
+                restrictInput: true,
+                min: new Date(2025,0,1),
+                max: new Date(2025,11,31),
+                value: new Date(),
+                month: {
+                    content: '# var holiday = holidays.find(h => h.date === kendo.toString(data.date, "yyyy-MM-dd")); #' +
+                        '# if (holiday) { #' +
+                            '<div class="holiday-day" title="#= holiday.title #">#= data.value #</div>' +
+                        '# } else { #' +
+                            '#= data.value #' +
+                        '# } #'
+                },
+                @* disableDates: [
+                    new Date(2025,03,01)
+                ], *@
+                @* disableDates: function(date) {
+                    return date && date.getDay() === 0; // 0 = Sunday
+                }, *@
+                change: function(e) {
+                    @* console.log(e.sender.value()); *@
+                    @* console.log(this.value()); *@
+
+                    // Use isValidDate to make sure the date is valid
+                    const dateValue = this.value();
+                    if (isValidDate(dateValue)) {
+                        console.log("Valid Date:", kendo.toString(dateValue, "dd-MM-yyyy"));
+                    }
+                    else {
+                        console.log("Invalid or empty date value.");
+                    }
+                }
+            });
+            // After initializing, set readonly on the internal input box
+            let datePicker = $("#datePicker").data("kendoDatePicker");
+            $(datePicker.element).attr("readonly", true);
+        }
+
+        $(document).ready(function() {            
+            initDatePicker();
+
+            const datePicker = $("#datePicker").data("kendoDatePicker");
+            const dateValue = datePicker.value();
+
+            console.log("locale:",navigator.language);
+
+            const price = 49.5;
+            const formattedPrice = kendo.toString(price, "c");
+            console.log("formattedPrice:",formattedPrice); // "$49.50" (depends on locale)
+        });
+    </script>
+}

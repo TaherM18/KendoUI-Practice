@@ -51,6 +51,16 @@ namespace MVC.Controllers
             return View();
         }
 
+        public IActionResult DatePicker()
+        {
+            return View();
+        }
+
+        public IActionResult DateTimePicker()
+        {
+            return View();
+        }
+
         public IActionResult Form()
         {
             return View();
