@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="col-6 m-auto mb-5">
+    <h4>Kendo Form</h4>
+    <div id="kendoForm"></div>
+</section>
+
+<section class="col-6 m-auto mb-5">
+    <h4>Kendo Form with Group</h4>
+    <div id="groupedKendoForm"></div>
+</section>
+
+
+@section Scripts {
+    <script>
+        function initKendoForm() {
+            $("#kendoForm").kendoForm({
+                orientation: "horizontal",
+                layout: "grid",
+                grid: {
+                    cols: 1,
+                    gutter: 16,
+                },
+                formData: {
+                    name: "",
+                    email: "",
+                    password: "",
+                    gender: "",
+                    dob: new Date(),
+                    time: new Date()
+                },
+                items: [
+                    { 
+                        field: "name",
+                        label: "Name",
+                        editor: "TextBox",
+                        validation: { required: true }
+                    },
+                    { 
+                        field: "email",
+                        label: "Email",
+                        editor: "TextBox",
+                        validation: { required: true, email: true }
+                    },
+                    { 
+                        field: "password",
+                        label: "Password",
+                        editor: "TextBox",
+                        validation: { required: true }
+                    },
+                    { 
+                        field: "gender", 
+                        label: "Gender",
+                        editor: "RadioGroup", 
+                        editorOptions: {
+                            items: [
+                                { label: "Male", value: "M" },
+                                { label: "Female", value: "F" },
+                                { label: "Other", value: "O" },
+                            ],
+                            layout: "horizontal"
+                        }, 
+                        validation: { required: true } 
+                    },
+                    { 
+                        field: "country", 
+                        label: "Country",
+                        editor: "DropDownList", 
+                        editorOptions: {
+                            optionLabel: "Select your country...",
+                            dataTextField: "name",
+                            dataValueField: "id",
+                            dataSource: [
+                                { name: "India", id: "1" },
+                                { name: "Sri-Lanka", id: "2" },
+                                { name: "Malaysia", id: "3" },
+                            ],
+                        }, 
+                        validation: { required: true } 
+                    },
+                    {
+                        field: "dob",
+                        label: "Date of Birth",
+                        editor: "DatePicker",
+                        editorOptions: {
+                            format: "yyyy-MM-dd",
+                        },
+                        validation: { required: true }
+                    },
+                    {
+                        field: "time",
+                        label: "Time",
+                        editor: "TimePicker",
+                        validation: { required: true }
+                    },
+                ],
+                validateOnBlur: true,
+                size: "medium",
+                clear: function(e) {
+                    console.log("🧹 Clear button clicked");
+                },
+            });
+            $("input[name='password']").attr("type", "password");
+            $("input[name='dob']").attr("readonly", true);
+            $("input[name='time']").attr("readonly", true);
+
+            $(".k-form-submit").on("click", function(e) {
+                e.preventDefault();
+                console.log("event:",e);
+                console.log("isDefaultPrevented:",e.isDefaultPrevented());
+
+                const form = $("#kendoForm").data("kendoForm");
+                console.log("kendoForm:",form);
+                console.log("kendoForm - model:",form._model);
+
+                if (form.validate()) {
+                    console.log("form is valid");
+                    var values = {};
+                    $("#kendoForm").find(":input").each(function() {
+                        values[this.name] = $(this).val();
+                    });
+                    values.gender = $("input[name='gender']:checked").val();
+                    console.log("formData:", values);
+                }
+                else {
+                    console.log("form is invalid");
+                }
+            });
+        }
+
+        function initGroupedKendoForm() {
+            $("#groupedKendoForm").kendoForm({
+                items: [
+                    {
+                        type: "group",
+                        label: "Personal",
+                        items: [
+                            { field: "c_firstname", label: "First Name", editor: "TextBox" },
+                            { field: "c_lastname", label: "LastName", editor: "TextBox" },
+                            { field: "c_address", label: "Address", editor: "TextBox" },
+                        ]
+                    },
+                    {
+                        type: "group",
+                        label: "Security",
+                        items: [
+                            { field: "c_password", label: "Password", editor: "TextBox" },
+                            { field: "c_confirm", label: "Confirm Password", editor: "TextBox" },
+                        ]
+                    }
+                ]
+                    
+            });
+            $("input[name='password']").attr("type", "password");
+            $("input[name='confirm']").attr("type", "password");
+        }
+
+        $(document).ready(function() {
+            initKendoForm();
+            initGroupedKendoForm();
+        });
+    </script>
+}
