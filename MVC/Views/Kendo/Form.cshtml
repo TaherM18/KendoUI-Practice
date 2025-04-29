@@ -6,6 +6,7 @@
 <section class="col-6 m-auto mb-5">
     <h4>Kendo Form</h4>
     <div id="kendoForm"></div>
+    <div id="preview"></div>
 </section>
 
 <section class="col-6 m-auto mb-5">
@@ -96,6 +97,46 @@
                         editor: "TimePicker",
                         validation: { required: true }
                     },
+                    {
+                        field: "image",
+                        label: "Profile Image",
+                        editor: function(container, options) {
+                            $(`<input type="file" name="${options.field}" required />`)
+                            .appendTo(container)
+                            .kendoUpload({
+                                multiple: false,
+                                async: {
+                                    saveUrl: "/save",
+                                    removeUrl: "/remove",
+                                    autoUpload: false
+                                },
+                                validation: {
+                                    allowedExtension: [ "jpg", "jpeg", "png" ],
+                                    maxFileSize: 4 * 1024 * 1024,
+                                },
+                                select: function(e) {                                    
+                                    const reader = new FileReader();
+                                    reader.onload = function(event) {
+                                        const img = document.createElement("img");
+                                        img.src = event.target.result;
+                                        img.style.width = "128px";
+                                        img.classList.add("img-thumbnail", "rounded");
+                                        $("#preview").append(img);
+                                    }
+                                    reader.readAsDataURL(e.files[0].rawFile);
+                                },
+                                remove: function() {
+                                    $("#preview").html("");
+                                },
+                                clear: function() {
+                                    $("#preview").html("");
+                                }
+                            });
+                        },
+                        validation: { 
+                            required: true,
+                        }
+                    },
                 ],
                 validateOnBlur: true,
                 size: "medium",
@@ -109,21 +150,34 @@
 
             $(".k-form-submit").on("click", function(e) {
                 e.preventDefault();
-                console.log("event:",e);
                 console.log("isDefaultPrevented:",e.isDefaultPrevented());
 
                 const form = $("#kendoForm").data("kendoForm");
                 console.log("kendoForm:",form);
                 console.log("kendoForm - model:",form._model);
 
+                var values = {};
+                $("#kendoForm").find(":input").each(function() {
+                    values[this.name] = $(this).val();
+                });
+                values.gender = $("input[name='gender']:checked").val();
+                values.image = $("input[name='image']").data("kendoUpload").getFiles()[0]?.rawFile;
+                values.image = $("input[name='image']").get(0).files[0];
+
+                console.log($("input[name='image']").data("kendoUpload").getFiles()[0]);
+                console.log($("input[name='image']").get(0).files[0]);
+
+                console.log("formData:", values);
+
+                if (values.image) {
+                    $("input[name='image']").removeAttr("required");
+                }
+                else {
+                    $("input[name='image']").attr("required", true);
+                }
+
                 if (form.validate()) {
                     console.log("form is valid");
-                    var values = {};
-                    $("#kendoForm").find(":input").each(function() {
-                        values[this.name] = $(this).val();
-                    });
-                    values.gender = $("input[name='gender']:checked").val();
-                    console.log("formData:", values);
                 }
                 else {
                     console.log("form is invalid");

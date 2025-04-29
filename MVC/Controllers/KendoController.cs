@@ -61,6 +61,11 @@ namespace MVC.Controllers
             return View();
         }
 
+        public IActionResult Upload()
+        {
+            return View();
+        }
+
         public IActionResult Form()
         {
             return View();

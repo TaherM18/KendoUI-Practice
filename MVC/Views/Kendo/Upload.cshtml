@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="col-4 m-auto">
+    <input id="kendoUpload" type="file" />
+    <div id="preview"></div>
+    <button class="btn btn-primary mt-4" id="btnFile">Console Log Files</button>
+</section>
+
+@section Scripts {
+    <script>
+        function initKendoUpload() {
+            $("#kendoUpload").kendoUpload({
+                multiple: true,
+                showFileList: true,
+                async: {
+                    saveUrl: "/save",
+                    removeUrl: "/remove",
+                    autoUpload: false,
+                },
+                validation: {
+                    allowedExtensions: ["jpg", "jpeg", "png"],
+                    maxFileSize: 4 * 1024 * 1024, // 4 MB
+                },
+                select: function(e) {
+                    console.log("Selected files:", e.files);
+
+                    e.files.forEach((file) => {
+                        let reader = new FileReader();
+                        reader.onload = function(event) {
+                            console.log("reader event:", event);
+                            const img = document.createElement("img");
+                            img.src = event.target.result;
+                            img.style.width = "100px";
+                            $("#preview").append(img);
+                        }
+                        reader.readAsDataURL(file.rawFile)
+                    });
+                },
+                clear: function() {
+                    $("#preview").html("");
+                }
+            });
+            const upload = $("#kendoUpload").data("kendoUpload");
+            console.log("KendoUpload:",upload);
+        }
+
+        $(document).ready(function() {
+            initKendoUpload();
+
+            $("#btnFile").on("click", function() {
+                let files = $("#kendoUpload").data("kendoUpload").getFiles();
+                console.log("files:",files);
+            })
+        });
+    </script>
+}
