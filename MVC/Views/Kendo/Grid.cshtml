@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="col-12 mb-5">
+    <h4>Hardcoded Data</h4>
+    <div id="grid"></div>
+</section>
+
+<section class="col-12 mb-5">
+    <h4>Using Transport</h4>
+    <div id="grid"></div>
+</section>
+
+@section Scripts {
+    <script>
+        function initKendoGrid() {
+            $("#grid").kendoGrid({
+                dataSource: {
+                    data: [
+                        { userId: 1, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-01-01", languages: [ "English", "Hindi", "Gujarati" ], gender: "M", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 2, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-02-02", languages: [ "English", "Marathi", "Hindi" ], gender: "M", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 3, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-03-03", languages: [ "English", "Hindi" ], gender: "M", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 4, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-04-04", languages: [ "English", "Gujarati" ], gender: "F", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 5, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-04-04", languages: [ "English", "Gujarati" ], gender: "F", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 6, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-04-04", languages: [ "English", "Gujarati" ], gender: "F", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 7, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-04-04", languages: [ "English", "Gujarati" ], gender: "O", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                        { userId: 8, userName: "Taher Maimoon", email: "taher@gmail.com", dob: "2025-04-04", languages: [ "English", "Gujarati" ], gender: "O", vendor: { bookName: "the jungle book" }, profileImage: "/images/placeholder.png" },
+                    ],
+                    schema: {
+                        model: {
+                            id: "userId",
+                            fields: {
+                                userId: { type: "number", editable: false, nullable: true },
+                                userName: { type: "string", validation: { required: true } },
+                                email: { type: "string", validation: { required: true } },
+                                dob: { type: "string", validation: { required: true } },
+                                languages: { type: "array", defaultValue: [], validation: { required: true } },
+                                vendor: { type: "object", defaultValue: { bookName: "" } },
+                                profileImage: { type: "string" },
+                            }
+                        }
+                    },
+                    pageSize: 5
+                },
+                toolbar: [ "create" ],
+                editable: "popup",
+                pageable: true,
+                sortable: true,
+                filterable: true,
+                columns: [
+                    { 
+                        field: "userName", 
+                        title: "User Name",
+                    },
+                    { 
+                        field: "email", 
+                        title: "Email",
+                    },
+                    { 
+                        field: "dob",
+                        title: "Date of Birth",
+                        editor: function(container, options) {
+                            $(`<input type="date" name="${options.field}" required />`)
+                            .appendTo(container)
+                            .kendoDatePicker({
+                                format: "dd-MM-yyyy",
+                                value: new Date(),
+                            });
+                            $(container).prop("readonly", true);
+                        },
+                    },
+                    { 
+                        field: "languages", 
+                        title: "Languages",
+                        template: "#= languages.join(',') #",
+                        editor: function(container, options) {
+                            console.log("kendoMultiSelect - options: ", options);
+
+                            $(`<select name="${options.field}" required></select>`)
+                            .appendTo(container)
+                            .kendoMultiSelect({
+                                placeholder: "Select languages",
+                                dataTextField: "name",
+                                dataValueField: "name",
+                                dataSource: [
+                                    { id: "1", name: "English" },
+                                    { id: "2", name: "Hindi" },
+                                    { id: "3", name: "Gujarati" },
+                                    { id: "4", name: "Hindi" },
+                                    { id: "5", name: "Marathi" },
+                                ]
+                            });
+                        }
+                    },
+                    { 
+                        field: "gender", 
+                        title: "Gender",
+                        editor: function(container, options) {
+                            console.log("kendoRadioGroup - options:",options);
+                            $(`<select name="${options.field}" required></select>`)
+                            .appendTo(container)
+                            .kendoDropDownList({
+                                optionLabel: "Select Gender...",
+                                dataTextField: "label",
+                                dataValueField: "value",
+                                dataSource: [
+                                    { label: "Male", value: "M" },
+                                    { label: "Female", value: "F" },
+                                    { label: "Other", value: "O" },
+                                ],
+                            });
+                        }
+                    },
+                    { 
+                        field: "vendor.bookName", 
+                        title: "Book Name",
+                        editor: function(container, options) {
+                            $(`<input name="bookName" data-bind="value:${options.field}" required />`)
+                            .appendTo(container)
+                            .kendoTextBox();
+                        }
+                    },
+                    { 
+                        field: "profileImage",
+                        title: "Profile Image",
+                        template: `<img src="#= profileImage #" class="img-thumbnail" style="height: 50px; width: auto;"/>`,
+                        editor: function(container, options) {
+                            $(`<input type="file" name="${options.field}" />`)
+                            .appendTo(container)
+                            .kendoUpload({
+                                multiple: false, 
+                                async: { 
+                                    saveUrl: "save", 
+                                    removeUrl: "remove", 
+                                    autoUpload: false
+                                }, 
+                                validation: { 
+                                    allowedExtensions: [ "jpg", "jpeg", "png" ],
+                                    maxFileSize: 4*1024*1024
+                                } 
+                            });
+                        },
+                    },
+                    { command: [ "edit", "destroy" ], title: "Actions" },
+                ]
+            });
+        }
+
+        $(document).ready(function() {
+            initKendoGrid();
+        });        
+    </script>
+}
